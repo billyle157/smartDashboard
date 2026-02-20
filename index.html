@@ -142,7 +142,7 @@
     <!-- sidebar -->
     <div id="info">
         <div id="title">
-            Break-ins in San Francisco - September 2017
+            Break-ins in San Francisco - 2025
             <span><a href="https://twitter.com/UW" target="_blank"><i class="bi bi-twitter"></i></a></span>
             <span><a href="https://github.com/jakobzhao/geog458" target="_blank"><i class="bi bi-github"></i></a></span>
             <span id="reset"><a href="#">reset</a></span>
@@ -224,6 +224,34 @@
 
       // join all the labels and the source to create the legend content.
       legend.innerHTML = labels.join('') + source;
+
+      // define the asynchronous function to load geojson data.
+
+      async function geojsonFetch() {
+
+          // Await operator is used to wait for a promise. 
+          // An await can cause an async function to pause until a Promise is settled.
+          let response;
+          response = await fetch('assets/SFCarBreakins2025.geojson');
+          breakins = await response.json();
+
+
+          map.on('load', () => { //simplifying the function statement: arrow with brackets to define a function
+
+          });
+
+
+
+          //load data to the map as new layers.
+          //map.on('load', function loadingData() {
+          map.on('idle', () => { //simplifying the function statement: arrow with brackets to define a function
+
+          });
+
+      }
+
+      // call the function
+      geojsonFetch();
 
       // capture the element reset and add a click event to it.
       const reset = document.getElementById('reset');
