@@ -238,6 +238,121 @@
 
           map.on('load', () => { //simplifying the function statement: arrow with brackets to define a function
 
+
+                // when loading a geojson, there are two steps
+                // add a source of the data and then add the layer out of the source
+                map.addSource('earthquakes', {
+                    type: 'geojson',
+                    data: earthquakes
+                });
+
+
+                map.addLayer({
+                        'id': 'earthquakes-point',
+                        'type': 'circle',
+                        'source': 'earthquakes',
+                        'minzoom': 5,
+                        'paint': {
+                            // increase the radii of the circle as mag value increases
+                            'circle-radius': {
+                                'property': 'mag',
+                                'stops': [
+                                    [grades[0], radii[0]],
+                                    [grades[1], radii[1]],
+                                    [grades[2], radii[2]]
+                                ]
+                            },
+                            // change the color of the circle as mag value increases
+                            'circle-color': {
+                                'property': 'mag',
+                                'stops': [
+                                    [grades[0], colors[0]],
+                                    [grades[1], colors[1]],
+                                    [grades[2], colors[2]]
+                                ]
+                            },
+                            'circle-stroke-color': 'white',
+                            'circle-stroke-width': 1,
+                            'circle-opacity': 0.6
+                        }
+                    },
+                    'waterway-label' // make the thematic layer above the waterway-label layer.
+                );
+
+
+                // click on each dot to view magnitude in a popup
+                map.on('click', 'earthquakes-point', (event) => {
+                    new mapboxgl.Popup()
+                        .setLngLat(event.features[0].geometry.coordinates)
+                        .setHTML(`<strong>Magnitude:</strong> ${event.features[0].properties.mag}`)
+                        .addTo(map);
+                });
+
+
+
+                // the coordinated chart relevant operations
+
+                // found the the magnitudes of all the earthquakes in the displayed map view.        
+                magnitudes = calEarthquakes(earthquakes, map.getBounds());
+
+                // enumerate the number of earthquakes.
+                numEarthquakes = magnitudes[4] + magnitudes[5] + magnitudes[6];
+
+                // update the content of the element earthquake-count.
+                document.getElementById("earthquake-count").innerHTML = numEarthquakes;
+
+                // add "mag" to the beginning of the x variable - the magnitude, and "#" to the beginning of the y variable - the number of earthquake of similar magnitude.
+                x = Object.keys(magnitudes);
+                x.unshift("mag")
+                y = Object.values(magnitudes);
+                y.unshift("#")
+
+
+                // generate the chart
+                earthquakeChart = c3.generate({
+                    size: {
+                        height: 350,
+                        width: 460
+                    },
+                    data: {
+                        x: 'mag',
+                        columns: [x, y],
+                        type: 'bar', // make a bar chart.
+                        colors: {
+                            '#': (d) => {
+                                return colors[d["x"]];
+                            }
+                        },
+                        onclick: function (
+                        d) { // update the map and sidebar once the bar is clicked.
+                            let floor = parseInt(x[1 + d["x"]]),
+                                ceiling = floor + 1;
+                            // combine two filters, the first is ['>=', 'mag', floor], the second is ['<', 'mag', ceiling]
+                            // the first indicates all the earthquakes with magnitude greater than floor, the second indicates
+                            // all the earthquakes with magnitude smaller than the ceiling.
+                            map.setFilter('earthquakes-point',
+                                ['all',
+                                    ['>=', 'mag', floor],
+                                    ['<', 'mag', ceiling]
+                                ]);
+                        }
+                    },
+                    axis: {
+                        x: { //magnitude
+                            type: 'category',
+                        },
+                        y: { //count
+                            tick: {
+                                values: [10, 20, 30, 40]
+                            }
+                        }
+                    },
+                    legend: {
+                        show: false
+                    },
+                    bindto: "#earthquake-chart" //bind the chart to the place holder element "earthquake-chart".
+                });
+              
           });
 
 
