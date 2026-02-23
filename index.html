@@ -253,24 +253,9 @@
                         'source': 'breakins',
                         'minzoom': 5,
                         'paint': {
-                            // increase the radii of the circle as mag value increases
-                            'circle-radius': {
-                                'property': 'incident_year',
-                                'stops': [
-                                    [grades[0], radii[0]],
-                                    [grades[1], radii[1]],
-                                    [grades[2], radii[2]]
-                                ]
-                            },
-                            // change the color of the circle as mag value increases
-                            'circle-color': {
-                                'property': 'mag',
-                                'stops': [
-                                    [grades[0], colors[0]],
-                                    [grades[1], colors[1]],
-                                    [grades[2], colors[2]]
-                                ]
-                            },
+                            
+                            'circle-radius': 5,
+                            'circle-color': 'rgb(103,169,207)',
                             'circle-stroke-color': 'white',
                             'circle-stroke-width': 1,
                             'circle-opacity': 0.6
@@ -280,79 +265,51 @@
                 );
 
 
-                // click on each dot to view magnitude in a popup
-                map.on('click', 'earthquakes-point', (event) => {
+                map.on('click', 'breakins-point', (event) => {
                     new mapboxgl.Popup()
                         .setLngLat(event.features[0].geometry.coordinates)
-                        .setHTML(`<strong>Magnitude:</strong> ${event.features[0].properties.mag}`)
+                        .setHTML(`<strong>Neighborhood:</strong> ${event.features[0].properties.analysis_neighborhood}<br>
+                                  <strong>Description:</strong> ${event.features[0].properties.incident_description}<br>
+                                  <strong>Date:</strong> ${event.features[0].properties.incident_date}`)
                         .addTo(map);
                 });
+        
+                count = calBreakIns(breakins, map.getBounds());
 
-
-
-                // the coordinated chart relevant operations
-
-                // found the the magnitudes of all the earthquakes in the displayed map view.        
-                magnitudes = calEarthquakes(earthquakes, map.getBounds());
-
-                // enumerate the number of earthquakes.
-                numEarthquakes = magnitudes[4] + magnitudes[5] + magnitudes[6];
+                numBreakIns = Object.values(magnitudes).reduce((a, b) => a + b, 0);
 
                 // update the content of the element earthquake-count.
-                document.getElementById("earthquake-count").innerHTML = numEarthquakes;
+                document.getElementById("Break-ins-count").innerHTML = numBreakIns;
 
                 // add "mag" to the beginning of the x variable - the magnitude, and "#" to the beginning of the y variable - the number of earthquake of similar magnitude.
-                x = Object.keys(magnitudes);
-                x.unshift("mag")
-                y = Object.values(magnitudes);
+                x = Object.keys(count);
+                x.unshift("district")
+                y = Object.values(count);
                 y.unshift("#")
 
 
                 // generate the chart
-                earthquakeChart = c3.generate({
+                breakInsChart = c3.generate({
                     size: {
                         height: 350,
                         width: 460
                     },
                     data: {
-                        x: 'mag',
+                        x: 'district',
                         columns: [x, y],
                         type: 'bar', // make a bar chart.
                         colors: {
                             '#': (d) => {
-                                return colors[d["x"]];
+                                return colors[d["x"] % colors.length];
                             }
                         },
-                        onclick: function (
-                        d) { // update the map and sidebar once the bar is clicked.
-                            let floor = parseInt(x[1 + d["x"]]),
-                                ceiling = floor + 1;
-                            // combine two filters, the first is ['>=', 'mag', floor], the second is ['<', 'mag', ceiling]
-                            // the first indicates all the earthquakes with magnitude greater than floor, the second indicates
-                            // all the earthquakes with magnitude smaller than the ceiling.
-                            map.setFilter('earthquakes-point',
-                                ['all',
-                                    ['>=', 'mag', floor],
-                                    ['<', 'mag', ceiling]
-                                ]);
-                        }
-                    },
-                    axis: {
-                        x: { //magnitude
-                            type: 'category',
+                        axis: {
+                            x: { type: 'category', tick: { rotate: 15, multiline: false } },
+                            y: { tick: { values: [50, 100, 200, 300] } }
                         },
-                        y: { //count
-                            tick: {
-                                values: [10, 20, 30, 40]
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    },
-                    bindto: "#earthquake-chart" //bind the chart to the place holder element "earthquake-chart".
-                });
-              
+                        legend: { show: false },
+                        bindto: "#Break-ins-chart"
+                    });
           });
 
 
@@ -360,13 +317,40 @@
           //load data to the map as new layers.
           //map.on('load', function loadingData() {
           map.on('idle', () => { //simplifying the function statement: arrow with brackets to define a function
+              
+                count = calBreakIns(breakins, map.getBounds());
+                numBreakIns  = Object.values(count).reduce((a, b) => a + b, 0);
+                document.getElementById("Break-ins-count").innerHTML = numBreakIns;
 
+
+                x = Object.keys(count);
+                x.unshift("district")
+                y = Object.values(count);
+                y.unshift("#")
+
+                // after finishing each map reaction, the chart will be rendered in case the current bbox changes.
+                breakInsChart.load({
+                    columns: [x, y]
+                });
           });
 
       }
 
       // call the function
       geojsonFetch();
+
+      function calEarthquakes(currentBreakIns, currentMapBounds) {
+
+          let districtClasses = {};
+          currentBreakIns.features.forEach(function (d) { 
+
+              if (currentMapBounds.contains(d.geometry.coordinates)) {
+                  let district = d.properties.police_district || 'Unknown';
+                  districtClasses[district] = (districtClasses[district] || 0) + 1;
+              }
+          })
+          return districtClasses;
+      }
 
       // capture the element reset and add a click event to it.
       const reset = document.getElementById('reset');
@@ -378,7 +362,7 @@
           center: [-122.44, 37.76]
         });
         // also remove all the applied filters
-        // map.setFilter('Break-ins-point', null)
+         map.setFilter('Break-ins-point', null)
           
       });
     </script>
