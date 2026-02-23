@@ -300,11 +300,9 @@
                         type: 'bar', // make a bar chart.
                         colors: {
                             '#': (d) => {
-                                return colors[d["x"] % colors.length]; 
-                            }
+                                return colors[d["x"] % colors.length]; }
                         }
                     },
-                    
                     axis: {
                         x: { type: 'category', tick: { rotate: 15, multiline: false } },
                         y: { tick: { values: [50, 100, 200, 300] } }
