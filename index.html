@@ -153,6 +153,9 @@
         </div>
         <div id="Break-ins-chart"></div>
 
+        <h5 id="day-desc">Break-ins by Day of Week</h5>
+        <div id="day-chart"></div>
+        
         <div id="footer">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
             dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
@@ -281,7 +284,6 @@
                 // update the content of the element earthquake-count.
                 document.getElementById("Break-ins-count").innerHTML = numBreakIns;
 
-                // add "mag" to the beginning of the x variable - the magnitude, and "#" to the beginning of the y variable - the number of earthquake of similar magnitude.
                 x = Object.keys(count);
                 x.unshift("district")
                 y = Object.values(count);
@@ -310,6 +312,36 @@
                     legend: { show: false },
                     bindto: "#Break-ins-chart"
                 });
+
+                        
+                let days = {};
+                breakins.features.forEach(d => {
+                    let day = d.properties.incident_day_of_week || 'Unknown';
+                    days[day] = (days[day] || 0) + 1;
+                });
+                
+                let dayOrder = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+                let dayChart = c3.generate({
+                    size: { height: 200, width: 460 },
+                    data: {
+                        columns: [
+                            ['incidents', ...dayOrder.map(d => days[d] || 0)]
+                        ],
+                        type: 'bar',
+                        colors: { 'incidents': 'rgb(103,169,207)' }
+                    },
+                    axis: {
+                        x: {
+                            type: 'category',
+                            categories: dayOrder,
+                            tick: { rotate: 15, multiline: false }
+                        }
+                    },
+                    legend: { show: false },
+                    bindto: "#day-chart"
+                }); 
+                
+              
           });
 
 
