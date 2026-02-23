@@ -241,21 +241,21 @@
 
                 // when loading a geojson, there are two steps
                 // add a source of the data and then add the layer out of the source
-                map.addSource('earthquakes', {
+                map.addSource('breakins', {
                     type: 'geojson',
-                    data: earthquakes
+                    data: breakins
                 });
 
 
                 map.addLayer({
-                        'id': 'earthquakes-point',
+                        'id': 'breakins-point',
                         'type': 'circle',
-                        'source': 'earthquakes',
+                        'source': 'breakins',
                         'minzoom': 5,
                         'paint': {
                             // increase the radii of the circle as mag value increases
                             'circle-radius': {
-                                'property': 'mag',
+                                'property': 'incident_year',
                                 'stops': [
                                     [grades[0], radii[0]],
                                     [grades[1], radii[1]],
