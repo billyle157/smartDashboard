@@ -276,7 +276,7 @@
         
                 count = calBreakIns(breakins, map.getBounds());
 
-                numBreakIns = Object.values(magnitudes).reduce((a, b) => a + b, 0);
+                numBreakIns = Object.values(count).reduce((a, b) => a + b, 0);
 
                 // update the content of the element earthquake-count.
                 document.getElementById("Break-ins-count").innerHTML = numBreakIns;
@@ -300,7 +300,7 @@
                         type: 'bar', // make a bar chart.
                         colors: {
                             '#': (d) => {
-                                return colors[d["x"] % colors.length];
+                                return colors[d["x"] % colors.length]; }
                             }
                         },
                         axis: {
@@ -339,7 +339,7 @@
       // call the function
       geojsonFetch();
 
-      function calEarthquakes(currentBreakIns, currentMapBounds) {
+      function calBreakIns(currentBreakIns, currentMapBounds) {
 
           let districtClasses = {};
           currentBreakIns.features.forEach(function (d) { 
@@ -362,7 +362,7 @@
           center: [-122.44, 37.76]
         });
         // also remove all the applied filters
-         map.setFilter('Break-ins-point', null)
+         map.setFilter('breakins-point', null)
           
       });
     </script>
