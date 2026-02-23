@@ -34,7 +34,7 @@
         top: 1%;
         bottom: 1%;
         left: .5%;
-        padding: 40px 15px 900px 15px;
+        padding: 40px 15px 20px 15px;
         overflow-y: scroll;
         background: #343a40;
         color: white;
@@ -377,7 +377,7 @@
           let districtClasses = {};
           currentBreakIns.features.forEach(function (d) { 
 
-              if (currentMapBounds.contains(d.geometry.coordinates)) {
+              if (d.geometry && d.geometry.coordinates && currentMapBounds.contains(d.geometry.coordinates)) {
                   let district = d.properties.police_district || 'Unknown';
                   districtClasses[district] = (districtClasses[district] || 0) + 1;
               }
