@@ -207,22 +207,15 @@
       const legend = document.getElementById('legend');
 
       //set up legend grades content and labels
-      let labels = ['<strong># of Break-ins</strong>'],
+      let labels = ['<strong>Vehicle Break-in Incident</strong>'],
         vbreak;
 
       //iterate through grades and create a scaled circle and label for each
-      for (var i = 0; i < grades.length; i++) {
-        vbreak = grades[i];
-        // you need to manually adjust the radius of each dot on the legend 
-        // in order to make sure the legend can be properly referred to the dot on the map.
-        dot_radii = 2 * radii[i];
-        labels.push(
-          '<p class="break"><i class="dot" style="background:' + colors[i] + '; width: ' + dot_radii +
-          'px; height: ' +
-          dot_radii + 'px; "></i> <span class="dot-label" style="top: ' + dot_radii / 2 + 'px;">' + vbreak +
-          '</span></p>');
-
-      }
+      labels.push(
+        '<p class="break"><i class="dot" style="background:rgb(103,169,207); width: 12px; height: 12px;"></i>' +
+        '<span class="dot-label" style="top:2px;">Break-in</span></p>'
+      );
+        
       const source =
         '<p style="text-align: right; font-size:10pt">Source: <a href="https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783/about_data">SF OpenData</a></p>';
 
